@@ -84,6 +84,31 @@ function homeView() {
         </div>
       </section>
 
+      <section class="pwa-demo-section section-container" aria-labelledby="pwa-demo-title">
+        <div class="pwa-demo-card">
+          <div class="pwa-demo-copy">
+            <p class="eyebrow">Práctica académica</p>
+            <h2 id="pwa-demo-title">Funciones PWA</h2>
+            <p>Prueba las notificaciones, la conexión y una acción que puede sincronizarse en segundo plano.</p>
+            <div class="pwa-demo-actions">
+              <button class="button" id="enable-notifications" type="button">🔔 Activar notificaciones</button>
+              <button class="button button-secondary" id="test-sync" type="button">🔄 Probar sincronización</button>
+            </div>
+          </div>
+          <div class="pwa-status-panel" aria-label="Estado de las funciones PWA">
+            <dl>
+              <div><dt>Service Worker</dt><dd id="sw-status">Comprobando…</dd></div>
+              <div><dt>Notificaciones</dt><dd id="notification-status">Comprobando…</dd></div>
+              <div><dt>Conexión</dt><dd id="connection-status">Comprobando…</dd></div>
+              <div><dt>Sincronización</dt><dd id="sync-status">Sin acciones pendientes</dd></div>
+            </dl>
+            <p class="pwa-result" id="pwa-result" role="status" aria-live="polite">
+              Usa los botones para iniciar la demostración.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="benefits" aria-label="Beneficios de TechVolt">
         <div class="section-container benefits-grid">
           <div>
@@ -276,6 +301,8 @@ export function renderRoute(manageFocus = true) {
     : route.name === "detail"
       ? "Detalle de producto | TechVolt"
       : "TechVolt | Tecnología para tu día";
+
+  document.dispatchEvent(new CustomEvent("techvolt:route-rendered"));
 
   if (manageFocus) {
     requestAnimationFrame(() => {

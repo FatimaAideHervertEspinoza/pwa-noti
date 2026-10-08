@@ -1,5 +1,9 @@
 // Nombre y version de la memoria cache (al cambiarla fuerza la actualizacion).
-const CACHE_NAME = "techvolt-cache-v9";
+const CACHE_NAME = "techvolt-cache-v13";
+const DB_NAME = "techvolt-pwa";
+const DB_VERSION = 1;
+const STORE_NAME = "acciones";
+const SYNC_TAG = "sincronizar-pedidos";
 
 // Archivos minimos estaticos de la interfaz (App Shell) para funcionar offline.
 const APP_SHELL = [
@@ -21,10 +25,7 @@ const DEVELOPMENT_MODULES = [
   "./src/components/footer.html",
   "./src/cart.js",
   "./src/products.js",
-  "./src/style.css",
-  "./src/styles/header.css",
-  "./src/styles/footer.css",
-  "./src/styles/catalogo.css"
+  "./src/pwa-demo.js"
 ];
 
 // Guarda una lista de archivos en cache de forma segura sin cancelar si alguno no existe.
@@ -163,4 +164,89 @@ self.addEventListener("fetch", (event) => {
 
   // Responde a la peticion usando la estrategia Cache First con guardado dinamico
   event.respondWith(cacheFirst(event.request));
+});
+
+// Abre el mismo almacenamiento de acciones pendientes que utiliza la pagina.
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      if (!database.objectStoreNames.contains(STORE_NAME)) {
+        database.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Marca como sincronizadas las acciones de demostracion que siguen pendientes.
+async function processPendingActions() {
+  // Accede a la base de datos compartida con pwa-demo.js.
+  const database = await openDatabase();
+  return new Promise((resolve, reject) => {
+    // La transaccion de lectura y escritura permite consultar y actualizar cada accion.
+    const transaction = database.transaction(STORE_NAME, "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+    let processed = 0;
+
+    request.onsuccess = () => {
+      // Selecciona unicamente las acciones que todavia no han sido sincronizadas.
+      request.result
+        .filter((action) => action.estado === "pendiente")
+        .forEach((action) => {
+          // Conserva la accion en IndexedDB, pero actualiza su estado y fecha.
+          store.put({
+            ...action,
+            estado: "sincronizada",
+            sincronizadaEn: new Date().toISOString()
+          });
+          processed += 1;
+        });
+    };
+
+    transaction.oncomplete = () => {
+      // Devuelve la cantidad de acciones procesadas para mostrarla en la interfaz.
+      database.close();
+      resolve(processed);
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error);
+    };
+  });
+}
+
+// Background Sync procesa la cola cuando el navegador recupera conectividad.
+self.addEventListener("sync", (event) => {
+  // Ignora otras tareas de sincronizacion que no pertenezcan a esta practica.
+  if (event.tag !== SYNC_TAG) return;
+
+  // waitUntil mantiene activo el Service Worker hasta terminar el proceso.
+  event.waitUntil(
+    processPendingActions().then(async (processed) => {
+      // Busca todas las ventanas abiertas de la PWA.
+      const openClients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      // Informa a la interfaz que la sincronizacion termino correctamente.
+      openClients.forEach((client) => client.postMessage({ type: "SYNC_COMPLETE", processed }));
+    })
+  );
+});
+
+// Al pulsar la notificacion, enfoca la PWA abierta o abre su pagina principal.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const mainUrl = event.notification.data?.url || new URL("./", self.registration.scope).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (openClients) => {
+      const appClient = openClients.find((client) => new URL(client.url).origin === self.location.origin);
+      if (appClient) return appClient.focus();
+      return self.clients.openWindow(mainUrl);
+    })
+  );
 });

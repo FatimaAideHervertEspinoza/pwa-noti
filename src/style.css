@@ -298,6 +298,81 @@ h2 {
   padding-bottom: clamp(40px, 6vw, 70px);
 }
 
+/* Demostracion academica de funciones PWA */
+.pwa-demo-section {
+  padding-bottom: clamp(40px, 6vw, 70px);
+}
+
+.pwa-demo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: clamp(28px, 5vw, 64px);
+  padding: clamp(24px, 4vw, 42px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.pwa-demo-copy > p:not(.eyebrow) {
+  max-width: 580px;
+  margin: 14px 0 22px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.pwa-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pwa-status-panel {
+  padding: 8px 20px 18px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.pwa-status-panel dl {
+  margin: 0;
+}
+
+.pwa-status-panel dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.pwa-status-panel dt {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.pwa-status-panel dd {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-align: right;
+}
+
+.pwa-status-panel dd[data-state="success"] { color: #15803d; }
+.pwa-status-panel dd[data-state="warning"] { color: #a16207; }
+.pwa-status-panel dd[data-state="error"] { color: #b91c1c; }
+
+.pwa-result {
+  margin: 16px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.pwa-result[data-state="success"] { color: #15803d; }
+.pwa-result[data-state="warning"] { color: #854d0e; }
+.pwa-result[data-state="error"] { color: #b91c1c; }
+
 .section-heading {
   display: flex;
   align-items: flex-end;
@@ -708,6 +783,10 @@ h2 {
     grid-template-columns: 1fr;
     gap: 24px;
   }
+
+  .pwa-demo-card {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 430px) {
@@ -737,6 +816,10 @@ h2 {
   .cart-item > img {
     width: 66px;
     height: 66px;
+  }
+
+  .pwa-demo-actions .button {
+    width: 100%;
   }
 }
 

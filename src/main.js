@@ -1,6 +1,7 @@
 import { initializeCart } from "./cart.js";
 import { renderRoute, navigateTo } from "./router.js";
 import { renderHeader, renderFooter } from "./components/layout.js";
+import { initializePwaDemo } from "./pwa-demo.js";
 
 // Renderiza los componentes compartidos de Header y Footer
 renderHeader();
@@ -55,6 +56,7 @@ document.addEventListener("click", (event) => {
 // Renderiza la vista inicial basada en la URL actual y activa el carrito
 renderRoute(false);
 initializeCart();
+initializePwaDemo();
 
 // Registro del Service Worker para funcionamiento PWA y soporte offline
 if ("serviceWorker" in navigator) {
